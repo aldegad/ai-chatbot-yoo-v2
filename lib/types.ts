@@ -11,7 +11,7 @@
   - **422 Unprocessable Entity**: 요청의 문법은 올바르지만, 의미론적 오류로 인해 요청을 처리할 수 없음을 나태냅니다.
  */
 
-import { Document, Schema } from 'mongoose'
+import { Document, Types } from 'mongoose'
 
 export type ApiResponse = {
   message?: string
@@ -21,7 +21,7 @@ export type ALL = 'ALL'
 
 export namespace IUser {
   export interface Model extends Document {
-    _id: Schema.Types.ObjectId
+    _id: Types.ObjectId
     email: string
     password: string
     createdAt: Date
@@ -58,7 +58,7 @@ export namespace ICharacter {
   }
   
   export interface Model extends Document {
-    _id: Schema.Types.ObjectId
+    _id: Types.ObjectId
     name: string
     system: string
     secret: string
@@ -102,7 +102,7 @@ export namespace ICharacter {
 
 export namespace IChatRoom {
   export interface Model extends Document {
-    _id: Schema.Types.ObjectId
+    _id: Types.ObjectId
     userId: IUser.Model['_id']
     characterId: ICharacter.Model['_id']
     userName: string
@@ -135,7 +135,7 @@ export namespace IChatRoom {
 
 export namespace IChatMessage {
   export interface Model extends Document {
-    _id: Schema.Types.ObjectId
+    _id: Types.ObjectId
     ChatRoomId: IChatRoom.Model['_id']
     role: 'user'|'assistance'
     content: string

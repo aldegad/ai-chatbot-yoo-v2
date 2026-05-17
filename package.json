@@ -2,7 +2,7 @@
   "dependencies": {
     "@react-native-async-storage/async-storage": "1.23.1",
     "@svgr/webpack": "^8.1.0",
-    "axios": "^1.7.3",
+    "axios": "^1.15.2",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "expo": "^51.0.0",
@@ -13,8 +13,8 @@
     "expo-status-bar": "~1.12.1",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.8.0",
-    "mongoose": "^8.5.2",
-    "next": "^14.2.5",
+    "mongoose": "^8.22.1",
+    "next": "^15.5.18",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-native": "0.74.5",
@@ -63,5 +63,8 @@
   "name": "ai-chatbot-yoo-v2",
   "main": "expo-router/entry",
   "version": "1.0.0",
-  "private": true
+  "private": true,
+  "overrides": {
+    "postcss": "8.5.14"
+  }
 }

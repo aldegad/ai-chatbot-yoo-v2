@@ -18,10 +18,19 @@ export default function NativeTextarea({
     });
   }, [onChange]);
 
+  const onInputEnter = useCallback((e:any) => {
+    onEnter?.({
+      native: e,
+      instance: {
+        value: e.nativeEvent.text,
+      },
+    });
+  }, [onEnter]);
+
   return <TextInput 
     multiline={true}
     style={[normalizeStyles.input, style]}
     onChange={onInputChange}
-    onSubmitEditing={e => onEnter()}
+    onSubmitEditing={onInputEnter}
     {...inputProps}></TextInput>;
 }

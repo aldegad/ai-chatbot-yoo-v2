@@ -53,7 +53,7 @@ export default function MyCharacterList() {
     }
   }
 
-  const onNavToChat = async(_id:IChatRoom.Model['_id']) => {
+  const onNavToChat = async(_id:ICharacter.Model['_id']) => {
     // createChatRoom
     const chatRoom = (await createChatRoom({ characterId: _id })).present()
     // router.push(`/chat/${_id}`)

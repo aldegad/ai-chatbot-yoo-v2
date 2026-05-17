@@ -4,20 +4,28 @@ import { IChatMessage } from '@type';
 import { authenticateUser } from '@api/_utils/auth';
 import Character from '@models/Character';
 
-const API_KEYS = [
-  process.env.ANTHROPIC_API_KEY1, 
-  process.env.ANTHROPIC_API_KEY2, 
-  process.env.ANTHROPIC_API_KEY3,
-  process.env.ANTHROPIC_API_KEY4
-] // 여러 개의 토큰을 배열에 저장
+const requireEnv = (name: string) => {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  return value;
+}
 
-const SYSTEM_CONFIG = (process.env.SYSTEM_CONFIG as string).replace(/\\n/g, '\n');;
-const INIT_MESSAGE_FILTER1 = process.env.INIT_MESSAGE_FILTER1 as string;
-const INIT_MESSAGE_FILTER2 = process.env.INIT_MESSAGE_FILTER2  as string;
-const REJECTED_MESSAGE_FILTER1 = process.env.REJECTED_MESSAGE_FILTER1 as string;
-const REJECTED_MESSAGE_FILTER2 = process.env.REJECTED_MESSAGE_FILTER2 as string;
-const TEST_NPC = process.env.TEST_NPC as string;
-const TEST_USER = process.env.TEST_USER as string;
+const getChatRuntimeConfig = () => ({
+  apiKeys: [
+    requireEnv('ANTHROPIC_API_KEY1'),
+    requireEnv('ANTHROPIC_API_KEY2'),
+    requireEnv('ANTHROPIC_API_KEY3'),
+    requireEnv('ANTHROPIC_API_KEY4'),
+  ],
+  systemConfig: requireEnv('SYSTEM_CONFIG').replace(/\\n/g, '\n'),
+  initMessageFilter1: requireEnv('INIT_MESSAGE_FILTER1'),
+  initMessageFilter2: requireEnv('INIT_MESSAGE_FILTER2'),
+  rejectedMessageFilter1: requireEnv('REJECTED_MESSAGE_FILTER1'),
+  rejectedMessageFilter2: requireEnv('REJECTED_MESSAGE_FILTER2'),
+  testUser: requireEnv('TEST_USER'),
+});
 
 let currentTokenIndex = 1; // 현재 사용 중인 토큰의 인덱스
 
@@ -34,24 +42,28 @@ export async function POST(req: NextRequest) {
 
     if(!character) return NextResponse.json({ error: '삭제된 캐릭터 입니다.' }, { status: 404 });
 
-    const system = `${SYSTEM_CONFIG}\n\n{npc}:\n${character.system}\n${character.secret}\n{user}:\n${TEST_USER}`;
+    const config = getChatRuntimeConfig();
+    const system = `${config.systemConfig}\n\n{npc}:\n${character.system}\n${character.secret}\n{user}:\n${config.testUser}`;
 
-    const responseMessage = await attemptApiCall({ system, message });
+    const responseMessage = await attemptApiCall({ system, message, config });
 
     return NextResponse.json({ message: responseMessage });
   } catch(error) {
+    console.error(error);
     return NextResponse.json({ error: '대화 실패' }, { status: 500 });
   }
 }
+type ChatRuntimeConfig = ReturnType<typeof getChatRuntimeConfig>
 type AttemptApiCallProps = {
   system:string,
   message:string,
+  config: ChatRuntimeConfig,
   rejectedMessage?:string,
   _tryCount?:number,
   _inToken?:number,
   _outToken?:number
 }
-const attemptApiCall = async({ system, message, rejectedMessage, _tryCount, _inToken, _outToken }:AttemptApiCallProps) : Promise<string> => {
+const attemptApiCall = async({ system, message, config, rejectedMessage, _tryCount, _inToken, _outToken }:AttemptApiCallProps) : Promise<string> => {
   let tryCount = _tryCount ? _tryCount + 1 : 1;
   let totalInToken = _inToken || 0;
   let totalOutToken = _outToken || 0;
@@ -61,16 +73,16 @@ const attemptApiCall = async({ system, message, rejectedMessage, _tryCount, _inT
   let messageWithUnlocker = [];
   if(!rejectedMessage) {
     messageWithUnlocker = [
-      { role: "user", content: INIT_MESSAGE_FILTER1 },
-      { role: "assistant", content: INIT_MESSAGE_FILTER2 },
+      { role: "user", content: config.initMessageFilter1 },
+      { role: "assistant", content: config.initMessageFilter2 },
       { role: "user", content: `%${message}%` }
     ]
   } else {
     messageWithUnlocker = [
       { role: "user", content: message },
       { role: "assistant", content: rejectedMessage },
-      { role: "user", content: REJECTED_MESSAGE_FILTER1 },
-      { role: "assistant", content: REJECTED_MESSAGE_FILTER2 },
+      { role: "user", content: config.rejectedMessageFilter1 },
+      { role: "assistant", content: config.rejectedMessageFilter2 },
       { role: "user", content: `%${message}%` }
     ]
   }
@@ -83,7 +95,7 @@ const attemptApiCall = async({ system, message, rejectedMessage, _tryCount, _inT
   }, {
       headers: {
           'Content-Type': 'application/json',
-          'x-api-key': API_KEYS[currentTokenIndex],
+          'x-api-key': config.apiKeys[currentTokenIndex],
           'anthropic-version': '2023-06-01'
       }
   });
@@ -101,6 +113,7 @@ const attemptApiCall = async({ system, message, rejectedMessage, _tryCount, _inT
     return await attemptApiCall({
       system, 
       message, 
+      config,
       rejectedMessage: response.data.content[0].text,
       _tryCount: tryCount,
       _inToken: totalInToken,

@@ -8,7 +8,6 @@ import useFormModel from "@local_modules/useFormModel"
 import { useModal } from "@local_modules/useModal"
 import { borderRadius, color } from "@theme/index"
 import { IChatRoom } from "@type"
-import { Schema } from "mongoose"
 
 const useModalCreateRoom = () => {
   const { createModal } = useModal()
@@ -18,7 +17,7 @@ const useModalCreateRoom = () => {
     userSystem: ''
   })
 
-  const createChatRoom = async(props: { characterId: Schema.Types.ObjectId }) => {
+  const createChatRoom = async(props: Pick<IChatRoom.CreateParams, 'characterId'>) => {
     resetFields()
 
     const chatRoom = await createModal(({ dismiss }) => (

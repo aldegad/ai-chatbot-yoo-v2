@@ -9,4 +9,6 @@ const ChatRoomSchema: Schema = new Schema<IChatRoom.Model>({
   userSystem: { type: String, required: true, maxlength: 500 }
 }, { timestamps: true })
 
-export default mongoose.models.ChatRoom as Model<IChatRoom.Model> || mongoose.model('ChatRoom', ChatRoomSchema)
+const ChatRoom = (mongoose.models.ChatRoom as Model<IChatRoom.Model>) || mongoose.model<IChatRoom.Model>('ChatRoom', ChatRoomSchema)
+
+export default ChatRoom

@@ -1,10 +1,8 @@
 const { withExpo } = require("@expo/next-adapter");
-const path = require('path'); // 추가된 부분
 
 /** @type {import('next').NextConfig} */
 const nextConfig = withExpo({
   reactStrictMode: false,
-  swcMinify: true,
   transpilePackages: [
     "react-native",
     "expo"

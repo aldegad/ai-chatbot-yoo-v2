@@ -21,8 +21,7 @@ export async function GET(req: NextRequest) {
 
     const characters = await Character.find(query, { secret: 0 });
 
-    // ICharacter.MineResponse 자료형 추가하고 싶어.
-    return NextResponse.json<ICharacter.MineResponse>({ list: characters, totalCount: characters.length }, { status: 200 });
+    return NextResponse.json<ICharacter.MineResponse>({ list: characters, length: characters.length }, { status: 200 });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: 'Error character mine' }, { status: 500 });

@@ -1,6 +1,6 @@
 // models/Character.ts
-import { ICharacter, IUser } from '@type';
-import mongoose, { Schema, Document, Model, SchemaType } from 'mongoose';
+import { ICharacter } from '@type';
+import mongoose, { Schema, Model } from 'mongoose';
 
 const CharacterSchema: Schema = new Schema<ICharacter.Model>({
   name: { type: String, required: true, maxlength: 15 },
@@ -15,4 +15,6 @@ const CharacterSchema: Schema = new Schema<ICharacter.Model>({
   }
 }, { timestamps: true });
 
-export default mongoose.models.Character as Model<ICharacter.Model> || mongoose.model('Character', CharacterSchema);
+const Character = (mongoose.models.Character as Model<ICharacter.Model>) || mongoose.model<ICharacter.Model>('Character', CharacterSchema);
+
+export default Character;

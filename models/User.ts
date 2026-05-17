@@ -7,4 +7,6 @@ const UserSchema: Schema = new Schema<IUser.Model>({
   password: { type: String, required: true, maxlength: 200 }
 }, { timestamps: true });
 
-export default mongoose.models.User as Model<IUser.Model> || mongoose.model<IUser.Model>('User', UserSchema);
+const User = (mongoose.models.User as Model<IUser.Model>) || mongoose.model<IUser.Model>('User', UserSchema);
+
+export default User;
